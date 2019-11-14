@@ -1,3 +1,5 @@
 terraform/.terraform
 terraform/terraform.tfstate*
 .vscode
+lambda_functions/*/.pytest_cache
+lambda_functions/*/__pycache__
