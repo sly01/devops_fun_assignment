@@ -14,25 +14,6 @@ data "aws_subnet_ids" "subnets" {
   vpc_id = "${data.aws_vpc.default.id}"
 }
 
-resource "aws_security_group" "alb_security_group" {
-  name        = "alb_security_group"
-  description = "Application load balancer http traffic"
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-}
-
 resource "aws_lb_listener" "front_end" {
   load_balancer_arn = "${aws_lb.alb.arn}"
   port              = "80"
@@ -40,7 +21,7 @@ resource "aws_lb_listener" "front_end" {
 
   default_action {
     type             = "forward"
-    target_group_arn = "${aws_lb_target_group.hello1_lambda_tg.arn}"
+    target_group_arn = "${aws_lb_target_group.fargate_app.arn}"
   }
 }
 
@@ -120,4 +101,14 @@ resource "aws_lb_target_group_attachment" "hello2_lb_tg_attachment" {
   target_group_arn = "${aws_lb_target_group.hello2_lambda_tg.arn}"
   target_id        = "${aws_lambda_function.hello2.arn}"
   depends_on       = ["aws_lambda_permission.hello2_with_lb"]
+}
+
+### ECS
+
+resource "aws_lb_target_group" "fargate_app" {
+    name = "fun-app-fargate-tg"
+    port = 80
+    protocol = "HTTP"
+    target_type = "ip"
+    vpc_id = "${data.aws_vpc.default.id}"
 }
