@@ -1,9 +1,13 @@
 podTemplate(label: 'mypod', containers: [
     containerTemplate(name: 'git', image: 'alpine/git', ttyEnabled: true, command: 'cat'),
+    containerTemplate(name: 'docker', image: 'docker',  ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'python', image: 'python:3.7-slim-buster', command: 'cat', ttyEnabled: true),
     containerTemplate(name: 'terraform', image: 'aerkoc/terraform:v0.0.1', command: 'cat', ttyEnabled: true),
-  ]
-  ) {
+  ],
+  volumes: [
+      hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')
+    ]
+) {
     node('mypod') {
         stage('Clone repository') {
             container('git') {
@@ -23,12 +27,28 @@ podTemplate(label: 'mypod', containers: [
 
         stage('Package python package as zip') {
             container('terraform') {
-                dir('devops_fun_assignment/terraform') {
-                    sh 'make help'
-                    sh 'make package'
-                    sh 'ls -lR ../lambda_functions/'
+                dir('devops_fun_assignment') {
+                    sh 'cd terraform && make package'
                 }
             }
+        }
+    
+        stage('Build Docker image for ECS and Push') {
+            container('docker') {
+                dir('devops_fun_assignment') {
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding',
+                        credentialsId: 'dockerhub',
+                        usernameVariable: 'DOCKER_HUB_USER',
+                        passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
+                            sh """
+                            docker login -u ${DOCKER_HUB_USER} -p ${DOCKER_HUB_PASSWORD}
+                            cd Docker && docker build -t aerkoc/nginx:v0.0.1 .
+                            docker push aerkoc/nginx:v0.0.1
+                            """
+                    }
+                }
+            }
+            
         }
     }
 }
