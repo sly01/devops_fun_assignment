@@ -1,7 +1,7 @@
 podTemplate(label: 'mypod', containers: [
     containerTemplate(name: 'git', image: 'alpine/git', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'python', image: 'python:3.7-slim-buster', command: 'cat', ttyEnabled: true),
-    containerTemplate(name: 'terraform', image: 'hashicorp/terraform:0.12.3', command: 'cat', ttyEnabled: true),
+    containerTemplate(name: 'terraform', image: 'aerkoc/terraform:v0.0.1', command: 'cat', ttyEnabled: true),
   ]
   ) {
     node('mypod') {
