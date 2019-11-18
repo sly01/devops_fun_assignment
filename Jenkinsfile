@@ -85,10 +85,19 @@ podTemplate(label: 'mypod', containers: [
         stage('Terraform Plan') {
             container('terraform') {
                 dir('devops_fun_assignment') {
-                    sh 'cd terraform && make plan'
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding',
+                        credentialsId: 'awscreds',
+                        usernameVariable: 'AWS_ACCESS_KEY',
+                        passwordVariable: 'AWS_SECRET_KEY']]) {
+                            sh """
+                            export AWS_ACCESS_KEY=${AWS_ACCESS_KEY} AWS_SECRET_KEY=${AWS_SECRET_KEY}
+                            cd terraform && make plan
+                            """
+                    }
                 }
             }
         }
+        
 
         stage('Approval') {
             timeout(time: 10, unit: 'MINUTES') {
@@ -99,7 +108,15 @@ podTemplate(label: 'mypod', containers: [
         stage('Terraform Apply') {
             container('terraform') {
                 dir('devops_fun_assignment') {
-                    sh 'cd terraform && make apply'
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding',
+                        credentialsId: 'awscreds',
+                        usernameVariable: 'AWS_ACCESS_KEY',
+                        passwordVariable: 'AWS_SECRET_KEY']]) {
+                            sh """
+                            export AWS_ACCESS_KEY=${AWS_ACCESS_KEY} AWS_SECRET_KEY=${AWS_SECRET_KEY}
+                            cd terraform && make apply
+                            """
+                    }
                 }
             }
         }    
