@@ -30,7 +30,7 @@ refresh:					## Refresh the remote state with existing AWS infra.
 	terraform refresh
 
 apply:						## Apply the changes in plan.
-	terraform apply terraform.plan -auto-approve
+	terraform apply -input=false terraform.plan
 
 output:						## See the output.
 	terraform output -json
