@@ -65,5 +65,43 @@ podTemplate(label: 'mypod', containers: [
                 }
             }
         }
+
+        stage('Terraform Format/Linting') {
+            container('terraform') {
+                dir('devops_fun_assignment') {
+                    sh 'cd terraform && make fmt'
+                }
+            }
+        }
+
+        stage('Terraform Validate') {
+            container('terraform') {
+                dir('devops_fun_assignment') {
+                    sh 'cd terraform && make validate'
+                }
+            }
+        }
+
+        stage('Terraform Plan') {
+            container('terraform') {
+                dir('devops_fun_assignment') {
+                    sh 'cd terraform && make plan'
+                }
+            }
+        }
+
+        stage('Approval') {
+            timeout(time: 10, unit: 'MINUTES') {
+                input message: "Does Plan look good?"
+            }       
+        }
+
+        stage('Terraform Apply') {
+            container('terraform') {
+                dir('devops_fun_assignment') {
+                    sh 'cd terraform && make apply'
+                }
+            }
+        }    
     }
 }

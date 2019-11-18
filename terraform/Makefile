@@ -17,14 +17,20 @@ get:				 		## Get the terraform modules
 init:						## Initialize remote S3 backend.
 	terraform init
 
+fmt:						## Lint/Format the terraform code in canonical format.
+	terraform fmt --diff
+
+validate:					## Validate the Terraform files
+	terraform validate
+
 plan:						## Plan the changes to infra.
-	terraform plan
+	terraform plan -out terraform.plan
 
 refresh:					## Refresh the remote state with existing AWS infra.
 	terraform refresh
 
 apply:						## Apply the changes in plan.
-	terraform apply
+	terraform apply terraform.plan -auto-approve
 
 output:						## See the output.
 	terraform output -json
